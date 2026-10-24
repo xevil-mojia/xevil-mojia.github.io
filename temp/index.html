@@ -12,6 +12,7 @@
 <meta property="og:title" content="For Ayda ✦">
 <meta property="og:description" content="A birthday letter in eleven scenes.">
 <meta property="og:image" content="./media/photo-1.jpg">
+<meta property="og:url" content="./media/photo-1.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='33' fill='none' stroke='%23e8c48a' stroke-width='5'/%3E%3Ccircle cx='50' cy='50' r='8' fill='%23e8c48a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -741,7 +742,7 @@ body.no-gl .cake-css,body.gl-failed .cake-css{display:block}
       <button class="btn" id="blowBtn" type="button">🌬 Blow the candles</button>
       <p class="mic-note" id="micNote">A tap is enough. The microphone never asks.</p>
     </div>
-    <p class="sr" id="cakeStatus" role="status" aria-live="polite">Eight candles spell out 29 12 2004.</p>
+    <p class="sr" id="cakeStatus" role="status" aria-live="polite">Seven candles, one wish.</p>
   </section>
 
   <section id="s4" aria-labelledby="galTitle">
@@ -920,7 +921,7 @@ body.no-gl .cake-css,body.gl-failed .cake-css{display:block}
     {
       title: "For your next birthday",
       body: "Wait for it. There is more. — MoJia",
-      unlockDate: "2025-12-29"
+      unlockDate: "2026-12-29"
     }
   ],
   giftNote: {
@@ -1881,13 +1882,18 @@ body.no-gl .cake-css,body.gl-failed .cake-css{display:block}
     var waxMat = new T.MeshStandardMaterial({ color: 0xfff6e8, roughness: 0.42, metalness: 0.02 });
     var flames = [];
     var candleLights = [];
-    var cx = -0.56;
+    var STEP = 0.165, GAP = 0.05;
+    var xs = [], cur = 0;
+    for (var xi = 0; xi < DIGITS.length; xi++) {
+      if (xi > 0) cur += STEP + ((xi === 2 || xi === 5) ? GAP : 0);
+      xs.push(cur);
+    }
+    var midX = (xs[0] + xs[xs.length - 1]) / 2;
+    for (var xj = 0; xj < xs.length; xj++) xs[xj] -= midX;
     var topY = tiers[1].y + tiers[1].h / 2 + 0.26;
-    for (var i = 0; i < 8; i++) {
-      if (i === 2 || i === 5) cx += 0.08;
+    for (var i = 0; i < DIGITS.length; i++) {
       var g = new T.Group();
-      g.position.set(cx, topY, 0);
-      cx += 0.16;
+      g.position.set(xs[i], topY, 0);
       var body = new T.Mesh(new T.CylinderGeometry(0.033, 0.035, 0.34, 10), waxMat);
       body.castShadow = true;
       g.add(body);
@@ -2141,11 +2147,12 @@ body.no-gl .cake-css,body.gl-failed .cake-css{display:block}
     var host = $("#cakeCss");
     if (!host) return;
     var html = '<div class="plate"></div><div class="tier t1"></div><div class="tier t2"></div>';
-    for (var i = 0; i < 8; i++) {
-      var x = 22 + i * 8;
-      if (i >= 2) x += 3;
-      if (i >= 5) x += 3;
-      html += '<div class="candle" style="left:' + x + '%;animation-delay:' + (i * 0.12) + 's;--d:' + (i * 0.13) + 's"><i></i><b></b><u></u></div>';
+    var n = 8;
+    for (var i = 0; i < n; i++) {
+      var x = 50 - (n - 1) * 3.9 + i * 7.8;
+      if (i >= 2) x += 1.3;
+      if (i >= 4) x += 1.3;
+      html += '<div class="candle" style="left:' + x.toFixed(2) + '%;animation-delay:' + (i * 0.12) + 's;--d:' + (i * 0.13) + 's"><i></i><b></b><u></u></div>';
     }
     host.innerHTML = html;
   }
@@ -2229,14 +2236,13 @@ body.no-gl .cake-css,body.gl-failed .cake-css{display:block}
     for (var i = 1; i <= CONFIG.photoCount; i++) photos.push({ type: "image", src: "media/photo-" + i + ".jpg", key: "photo-" + i });
     var videos = [];
     for (var v = 1; v <= CONFIG.videoCount; v++) videos.push({ type: "video", src: "media/video-" + v + ".mp4", key: "video-" + v, poster: "media/photo-" + (v * 3) + ".jpg" });
-    var total = 12;
-    var wantVid = Math.min(videos.length, 3);
-    var pList = sampleList(photos, total - wantVid);
-    var vList = sampleList(videos, wantVid);
     var items = [], vi = 0, pi = 0;
-    for (var k = 0; k < total; k++) {
-      if ((k % 4 === 3 && vi < vList.length) || pi >= pList.length) { if (vi < vList.length) items.push(vList[vi++]); }
-      else if (pi < pList.length) items.push(pList[pi++]);
+    var totalItems = photos.length + videos.length;
+    for (var k = 0; k < totalItems; k++) {
+      var takeVideo = (k % 5 === 4 && vi < videos.length) || pi >= photos.length;
+      if (takeVideo && vi < videos.length) items.push(videos[vi++]);
+      else if (pi < photos.length) items.push(photos[pi++]);
+      else if (vi < videos.length) items.push(videos[vi++]);
     }
     gallery.items = items;
 
